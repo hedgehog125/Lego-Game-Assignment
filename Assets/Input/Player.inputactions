@@ -1,0 +1,12 @@
+{
+    "name": "Player",
+    "maps": [
+        {
+            "name": "Default",
+            "id": "ffa9975a-2db5-42d7-b2c7-e658c61639e0",
+            "actions": [],
+            "bindings": []
+        }
+    ],
+    "controlSchemes": []
+}
