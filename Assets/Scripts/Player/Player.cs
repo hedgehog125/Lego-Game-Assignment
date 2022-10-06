@@ -23,6 +23,9 @@ namespace Player {
 		private bool laneSwitchFailed;
 		private float[] lanes;
 
+		private int[] stuckTicks = new int[2];
+		private Vector3 lastPos;
+
 		private float distanceMoved;
 		private float speed;
 
@@ -31,12 +34,12 @@ namespace Player {
 			rb = GetComponent<Rigidbody>();
 
 			speed = m_difficulty.startSpeed;
-
 			lanes = new float[] {
 				-m_movement.laneWidth,
 				0,
 				m_movement.laneWidth
 			};
+			lastPos = transform.position;
 		}
 
 		private enum SwipeAction {
@@ -75,7 +78,8 @@ namespace Player {
 
 		private void FixedUpdate() {
 			Vector3 vel = rb.velocity;
-			
+
+			CheckStuckTick();
 			LoopPositionTick();
 			LanesTick(ref vel);
 
@@ -87,6 +91,26 @@ namespace Player {
 			rb.velocity = vel;
 		}
 
+		private void CheckStuckTick() {
+			Vector3 pos = transform.position;
+			if (
+				Mathf.Abs(pos.x - lastPos.x) > 0.015f
+				|| switchingToLane == -1 // Only count it if changing lanes
+			) {
+				stuckTicks[0] = 0;
+			}
+			else {
+				stuckTicks[0]++;
+			}
+			if (Mathf.Abs(pos.z - lastPos.z) > 0.015f) {
+				stuckTicks[1] = 0;
+			}
+			else {
+				stuckTicks[1]++;
+			}
+
+			lastPos = pos;
+		}
 		private void LoopPositionTick() {
 			int multiple = Mathf.FloorToInt(transform.position.z / m_loopAfter);
 			if (multiple == 0) return;
@@ -111,7 +135,7 @@ namespace Player {
 					FinishLaneSwitch(ref pos, ref vel, targetX, isRight);
 				}
 				else {
-					if (switchLaneTick == m_movement.maxLaneSwitchTime) { // Reverse
+					if (switchLaneTick == m_movement.maxLaneSwitchTime || stuckTicks[0] >= 3) { // Reverse
 						if (laneSwitchFailed) { // Just teleport if it's gone wrong twice
 							FinishLaneSwitch(ref pos, ref vel, targetX, isRight);
 						}
