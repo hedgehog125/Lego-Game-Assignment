@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b07d775604dc4afb8514e2884e61c6d, type: 3}
   m_Name: Difficulty
   m_EditorClassIdentifier: 
-  startSpeed: 1
+  startSpeed: 2.5
   maxSpeed: 25
   speedupRate: 0.001

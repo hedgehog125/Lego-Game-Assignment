@@ -76,12 +76,25 @@ namespace Player {
 			}
 		}
 
+		private bool jumpInput;
+		private void OnJump(InputValue input) {
+			if (! input.isPressed) {
+				jumpInput = false;
+				return;
+			}
+
+			if (jumpInput) queuedInput = SwipeAction.Jump;
+			else jumpInput = true;
+		}
+
+
 		private void FixedUpdate() {
 			Vector3 vel = rb.velocity;
 
 			CheckStuckTick();
 			LoopPositionTick();
 			LanesTick(ref vel);
+			JumpTick(ref vel);
 
 			vel.z = speed;
 
@@ -135,7 +148,8 @@ namespace Player {
 					FinishLaneSwitch(ref pos, ref vel, targetX, isRight);
 				}
 				else {
-					if (switchLaneTick == m_movement.maxLaneSwitchTime || stuckTicks[0] >= 3) { // Reverse
+					bool withinSlowDistance = Mathf.Abs(pos.x - targetX) < m_movement.slowDistanceBeforeLane;
+					if (switchLaneTick == m_movement.maxLaneSwitchTime || (stuckTicks[0] >= 3 && (! withinSlowDistance))) { // Reverse
 						if (laneSwitchFailed) { // Just teleport if it's gone wrong twice
 							FinishLaneSwitch(ref pos, ref vel, targetX, isRight);
 						}
@@ -151,7 +165,7 @@ namespace Player {
 					}
 					else {
 						if (
-							Mathf.Abs(pos.x - targetX) < m_movement.slowDistanceBeforeLane
+							withinSlowDistance
 							&& queuedInput == SwipeAction.None // Increase the speed if there's another input
 						) {
 							vel.x *= m_movement.slowDistanceMaintainance;
@@ -171,7 +185,7 @@ namespace Player {
 				}
 
 				if (switchingToLane == -1) {
-					if (queuedInput != SwipeAction.None) {
+					if (queuedInput == SwipeAction.Left || queuedInput == SwipeAction.Right) {
 						QueueLaneSwitch(queuedInput == SwipeAction.Right);
 						queuedInput = SwipeAction.None;
 					}
@@ -194,6 +208,20 @@ namespace Player {
 			switchingToLane = -1;
 			switchLaneTick = 0;
 			laneSwitchFailed = false;
+		}
+
+		private void JumpTick(ref Vector3 vel) {
+			if (! jumpInput) {
+				if (queuedInput == SwipeAction.Jump) {
+					jumpInput = true;
+					queuedInput = SwipeAction.None;
+				}
+			}
+
+			if (jumpInput) { // TODO: raycast
+				vel.y += m_movement.jumpAmount;
+				jumpInput = false;
+			}
 		}
 	}
 }

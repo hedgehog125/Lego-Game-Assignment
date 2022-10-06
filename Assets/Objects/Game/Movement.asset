@@ -19,5 +19,5 @@ MonoBehaviour:
   slowDistanceBeforeLane: 0.65
   slowDistanceMaintainance: 0.8
   laneSlowMinSpeed: 0.4
-  jumpAmount: 2
+  jumpAmount: 5
   fastFallAccceleration: 2
