@@ -6,7 +6,7 @@ namespace Environment {
 	[RequireComponent(typeof(MeshCollider))]
 	[RequireComponent(typeof(Rigidbody))]
 	public class ObstacleGenerator : MonoBehaviour {
-		[SerializeField] private List<Obstacle> obstacles;
+		[SerializeField] private List<ObstacleData> obstacles;
 
 		private MeshCollider col;
 		private void Awake() {

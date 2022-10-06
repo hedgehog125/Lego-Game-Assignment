@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Environment {
 	[CreateAssetMenu]
-	public class Obstacle : ScriptableObject {
+	public class ObstacleData : ScriptableObject {
 		public GameObject prefab;
 		public Vector3 offset;
 	}
