@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18154658, g: 0.22718711, b: 0.30740508, a: 1}
+  m_IndirectSpecularColor: {r: 0.18154658, g: 0.22718711, b: 0.30740505, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -302,7 +302,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 564460636}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 225}
   m_LocalScale: {x: 0.6, y: 0.2, z: 50}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -629,7 +629,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_obstacleScript: {fileID: 1545220317}
-  m_cmCam: {fileID: 1882036014}
+  m_cmCam: {fileID: 1882036015}
   m_difficulty: {fileID: 11400000, guid: a8ce6a4e620a14e7fbf69dac43374dd4, type: 2}
   m_loopAfter: 100
 --- !u!54 &1761057316
@@ -742,6 +742,7 @@ GameObject:
   - component: {fileID: 1882036011}
   - component: {fileID: 1882036014}
   - component: {fileID: 1882036013}
+  - component: {fileID: 1882036015}
   m_Layer: 0
   m_Name: DefaultPerspective
   m_TagString: Untagged
@@ -810,7 +811,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 2.028473, y: 1}
+    m_SensorSize: {x: 2.1246376, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -819,6 +820,18 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_ComponentOwner: {fileID: 369431668}
+--- !u!114 &1882036015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1882036010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd3e4f99f69cf5a49a25a25c47c52ac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1884286933
 GameObject:
   m_ObjectHideFlags: 0

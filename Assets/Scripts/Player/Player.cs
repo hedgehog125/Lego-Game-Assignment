@@ -8,7 +8,7 @@ using Cinemachine;
 public class Player : MonoBehaviour {
 	[Header("Objects and references")]
 	[SerializeField] private ObstacleGenerator m_obstacleScript;
-	[SerializeField] private CinemachineVirtualCamera m_cmCam;
+	[SerializeField] private CmCam m_cmCam;
 
 	[Header("")]
 	[SerializeField] private Difficulty m_difficulty;
@@ -25,7 +25,7 @@ public class Player : MonoBehaviour {
 	}
 
 	private void FixedUpdate() {
-		if (transform.position.z > m_loopAfter) LoopPosition();
+		LoopPosition();
 
 		Vector3 vel = rb.velocity;
 		vel.z = speed;
@@ -36,14 +36,11 @@ public class Player : MonoBehaviour {
 	}
 
 	private void LoopPosition() {
-		Vector3 moveAmount = new Vector3(0, 0, -transform.position.z);
+		int multiple = Mathf.FloorToInt(transform.position.z / m_loopAfter);
+		Vector3 moveAmount = new Vector3(0, 0, -(multiple * m_loopAfter));
 
-		Vector3 pos = transform.position;
-		pos.z = 0f;
-		transform.position = pos;
-
-		m_cmCam.ForceCameraPosition(m_cmCam.transform.position + moveAmount, m_cmCam.transform.rotation);
-
+		transform.position += moveAmount;
+		m_cmCam.LoopPosition(moveAmount);
 		m_obstacleScript.LoopPosition(moveAmount);
 	}
 }
