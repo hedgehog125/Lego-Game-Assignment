@@ -15,3 +15,4 @@ MonoBehaviour:
   startSpeed: 2.5
   maxSpeed: 25
   speedupRate: 0.001
+  stunTime: 250

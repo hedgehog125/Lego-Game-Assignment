@@ -33,7 +33,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Slide",
+                    "name": "Duck",
                     "type": "Value",
                     "id": "3c871d7a-ac51-4b98-bff1-8fc962f056fe",
                     "expectedControlType": "Button",
@@ -72,7 +72,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
-                    "action": "Slide",
+                    "action": "Duck",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

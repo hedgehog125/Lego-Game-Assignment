@@ -14,8 +14,17 @@ namespace Player {
 		public float slowDistanceMaintainance;
 		public float laneSlowMinSpeed;
 
-		[Header("Jumping and falling")]
+		[Header("Jumping, ducking and falling")]
 		public float jumpAmount;
+
 		public float fastFallAccceleration;
+		public float duckHeight;
+		public int duckTime;
+
+		[Header("Death")]
+		public float slowMoSpeed;
+		public float deathKnockbackAmount;
+		public float deathRotateAmount;
+		public float deathSpeedMaintainance;
 	}
 }
