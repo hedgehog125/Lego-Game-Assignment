@@ -4,12 +4,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Environment;
 using Util = Tools.Util;
+using static UnityEditor.PlayerSettings;
 
 namespace Player {
 	public class Player : MonoBehaviour {
 		[Header("Objects and references")]
 		[SerializeField] private ObstacleGenerator m_obstacleScript;
-		[SerializeField] private CmCam m_cmCam;
+		[SerializeField] private CameraController m_cmCam;
 		[SerializeField] private PlayerVisible vis;
 
 		[Header("")]
@@ -130,7 +131,7 @@ namespace Player {
 				bool onGround = DetectGroundTick();
 				LoopPositionTick(ref pos);
 				LanesTick(ref pos, ref vel);
-				JumpTick(ref vel, onGround);
+				JumpTick(ref pos, ref vel, onGround);
 				ProcessDuckTick(onGround, ref pos, ref vel);
 				DeathPlaneTick(pos, ref vel);
 				ProcessStunTick();
@@ -145,7 +146,8 @@ namespace Player {
 			rb.velocity = vel;
 			transform.position = pos;
 			
-			vis.Render(this);
+			vis.RenderState(this);
+			m_cmCam.RenderState(this);
 		}
 
 		private void CheckStuckTick(Vector3 pos) {
@@ -168,7 +170,7 @@ namespace Player {
 			lastPos = pos;
 		}
 		private bool DetectGroundTick() {
-			Vector3 offset = new Vector3(0, -(col.height / 2) + 0.025f, 0);
+			Vector3 offset = new Vector3(0, -(col.bounds.size.y / 2) + 0.025f, 0);
 			Vector3 bottom = col.bounds.center + offset;
 			return Physics.Raycast(bottom, Vector3.down, 0.05f);
 		}
@@ -195,7 +197,10 @@ namespace Player {
 				}
 				else {
 					bool withinSlowDistance = Mathf.Abs(pos.x - targetX) < m_movement.slowDistanceBeforeLane;
-					if (switchLaneTick == m_movement.maxLaneSwitchTime || (stuckTicks[0] >= 3 && (! withinSlowDistance))) { // Reverse
+					int maxStopTime = 3;
+					//if (withinSlowDistance) maxStopTime = 10;
+
+					if (switchLaneTick == m_movement.maxLaneSwitchTime || stuckTicks[0] >= maxStopTime) { // Reverse
 						if (laneSwitchFailed) { // Just teleport if it's gone wrong twice
 							FinishLaneSwitch(ref pos, ref vel, targetX, isRight);
 						}
@@ -256,7 +261,7 @@ namespace Player {
 			laneSwitchFailed = false;
 		}
 
-		private void JumpTick(ref Vector3 vel, bool onGround) {
+		private void JumpTick(ref Vector3 pos, ref Vector3 vel, bool onGround) {
 			if (! jumpInput) {
 				if (queuedInput == SwipeAction.Jump) {
 					jumpInput = true;
@@ -265,6 +270,8 @@ namespace Player {
 			}
 
 			if (jumpInput && onGround) { // TODO: buffer if not on ground, maybe differently to normal so 2 things can be buffered?
+				if (Ducking) EndDuck(ref pos);
+
 				vel.y = m_movement.jumpAmount;
 				jumpInput = false;
 				fastFalling = false;
@@ -280,16 +287,19 @@ namespace Player {
 
 			if (Ducking) {
 				if (onGround) fastFalling = false;
+				else {
+					if (duckInput) {
+						fastFalling = true;
+						duckInput = false;
+					}
+				}
+
 				if (fastFalling) {
 					vel.y -= m_movement.fastFallAccceleration;
 				}
 
 				if (duckTick == m_movement.duckTime) {
-					Ducking = false;
-					fastFalling = false;
-					duckTick = 0;
-					col.height = standHeight;
-					pos.y += halfDuckHeightDiff;
+					EndDuck(ref pos);
 				}
 				else {
 					duckTick++;
@@ -305,6 +315,14 @@ namespace Player {
 				}
 			}
 		}
+		private void EndDuck(ref Vector3 pos) {
+			Ducking = false;
+			fastFalling = false;
+			duckTick = 0;
+			col.height = standHeight;
+			pos.y += halfDuckHeightDiff;
+		}
+
 		private void ProcessStunTick() {
 			if (stunTick == m_difficulty.stunTime) {
 				Stunned = false;
@@ -315,9 +333,10 @@ namespace Player {
 			}
 		}
 		private void CheckCrashedTick(ref Vector3 vel) {
-			if (switchingToLane != -1) return;
+			int maxStopTime = 3;
+			if (switchingToLane != -1) maxStopTime = 10;
 
-			if (stuckTicks[1] >= 3) {
+			if (stuckTicks[1] >= maxStopTime) {
 				GameOver(ref vel);
 			}
 		}
@@ -331,15 +350,16 @@ namespace Player {
 				return;
 			}
 			Stunned = true;
+			vis.OnStun();
 		}
 		private void GameOver(ref Vector3 vel) {
 			Dead = true;
+			vis.OnDie();
 
 			rb.constraints = RigidbodyConstraints.None;
 			vel = new Vector3(0, 0, -m_movement.deathKnockbackAmount);
 			rb.angularVelocity = new Vector3(-m_movement.deathRotateAmount, 0, 0);
 			Time.timeScale = m_movement.slowMoSpeed;
-			Debug.Log("Game over");
 		}
 	}
 }
