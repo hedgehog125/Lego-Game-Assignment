@@ -6,6 +6,9 @@ namespace Environment {
 	[CreateAssetMenu]
 	public class ObstacleData : ScriptableObject {
 		public GameObject prefab;
+		public Mesh collider;
 		public Vector3 offset;
+
+		public bool blocksLane;
 	}
 }

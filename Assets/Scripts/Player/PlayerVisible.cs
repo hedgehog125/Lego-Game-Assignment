@@ -10,6 +10,7 @@ namespace Player {
 		[Header("SFX")]
 		[SerializeField] private AudioSource m_bonkSound;
 		[SerializeField] private float m_stunVolume;
+		[SerializeField] private AudioSource m_deathSound;
 
 		public void RenderState(Player player) {
 			m_halo.SetActive(player.Stunned);
@@ -24,6 +25,8 @@ namespace Player {
 			m_bonkSound.Stop();
 			m_bonkSound.volume = 1;
 			m_bonkSound.Play();
+
+			m_deathSound.Play();
 		}
 
 		public void OnStun() {
