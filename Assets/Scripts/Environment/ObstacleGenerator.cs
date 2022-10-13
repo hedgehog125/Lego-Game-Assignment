@@ -25,8 +25,6 @@ namespace Environment {
 		private int lastSolidChunkID = -1; // The id of the furthest away chunk with collision
 		private int lastVisibleChunkID = -1;
 
-		private float playerStartOffset; // Because of the looping, the player being at Z: 0 might mean they're actually at the border of the chunk and not just the centre, this counters for it
-
 		private ObstaclesRenderer ren;
 		private Collider playerCol;
 		private void Awake() {
@@ -35,7 +33,6 @@ namespace Environment {
 			ren.Init(obstacles, m_chunkLength, m_tileSize);
 
 			lastChunk = new Chunk(m_chunkLength);
-			playerStartOffset = (m_chunkLength * m_tileSize) / 2; // The player starts in the centre of the chunk
 
 			Tick();
 		}
@@ -48,13 +45,7 @@ namespace Environment {
 			GenerateChunksTick();
 		}
 		private void GenerateChunksTick() {
-			int playerChunkID = Mathf.FloorToInt(
-				(
-					(m_player.transform.position.z + (playerCol.bounds.size.z / 2))
-					+ playerStartOffset
-				)
-				/ (m_chunkLength * m_tileSize)
-			);
+			int playerChunkID = GetPlayerChunkID();
 			bool colliderUpdateNeeded = playerChunkID + m_physicsGenAhead > lastSolidChunkID;
 
 			int chunksNeeded = (playerChunkID - lastVisibleChunkID) + m_visibleGenAhead;
@@ -126,17 +117,22 @@ namespace Environment {
 			return tile == null? -1 : (int)tile;
 		}
 
-		public void LoopPosition(Vector3 moveAmount) {
-			float movedBack = Mathf.Abs(moveAmount.z);
-			float chunkWorldLength = m_chunkLength * m_tileSize;
-			int chunksMovedBack = Mathf.FloorToInt(movedBack / chunkWorldLength);
+		private int GetPlayerChunkID() {
+			return Mathf.FloorToInt(
+				(m_player.transform.position.z + (playerCol.bounds.size.z / 2))
+				/ (m_chunkLength * m_tileSize)
+			);
+		}
 
-			lastVisibleChunkID -= chunksMovedBack;
-			lastSolidChunkID -= chunksMovedBack;
-			//playerStartOffset = moved + ((chunksMovedBack + 0.5f) * chunkWorldLength);
-			playerStartOffset = (movedBack % chunkWorldLength) + (lastVisibleChunkID * chunkWorldLength);
-			Debug.Log(playerStartOffset);
-			Debug.Log(lastVisibleChunkID);
+		public void LoopPosition(Vector3 moveAmount) {
+			{
+				int playerChunkID = GetPlayerChunkID();
+				int countInFront = lastVisibleChunkID - playerChunkID;
+
+				int diff = lastVisibleChunkID - lastSolidChunkID;
+				lastVisibleChunkID = countInFront;
+				lastSolidChunkID = lastVisibleChunkID - diff;
+			}
 
 			ren.LoopPosition(moveAmount);
 		}

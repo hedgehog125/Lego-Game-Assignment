@@ -18,9 +18,7 @@ namespace Environment {
 			}
 		}
 		private List<VisibleObject> visibleObjects = new List<VisibleObject>();
-		// ^ When things loop, this will be increased by the value provided and the whole object will be moved back. But the individual obstacles will be moved instead during the next collider update, using this value.
 		private bool movedBack;
-		private float offsetFromLooping;
 
 		private List<ObstacleData> obstacles;
 		private int chunkLength;
@@ -36,7 +34,9 @@ namespace Environment {
 		}
 
 		public void Render(Chunk[] chunks, int startChunkID, bool shouldUpdateCollider) {
+			Vector3 counterOffset = Vector3.zero;
 			if (shouldUpdateCollider) ResetContainerLoopPos(); // If it's going to be reset, it needs to be done before the new objects so they don't get offset
+			else counterOffset.z = -transform.position.z; // If it's not being reset yet, the offset still needs to be accounted for
 
 			for (int i = 0; i < chunks.Length; i++) {
 				int chunkID = i + startChunkID;
@@ -48,7 +48,7 @@ namespace Environment {
 					ObstacleData obstacle = obstacles[tileID];
 
 					GameObject tile = Instantiate(obstacle.prefab, transform);
-					tile.transform.localPosition = IndexToWorldPos(pos, chunkID) + obstacle.offset;
+					tile.transform.localPosition = IndexToWorldPos(pos, chunkID) + obstacle.offset + counterOffset;
 
 					visibleObjects.Add(new VisibleObject(tile, tileID));
 				}
@@ -61,13 +61,12 @@ namespace Environment {
 			return new Vector3(
 				((index % 3) - 1) * tileSize,
 				0,
-				(
-					(chunkID * chunkLength * tileSize) - ((Mathf.Floor(index / 3) - (chunkLength / 2)) * tileSize)
-				) + offsetFromLooping
+				(chunkID * chunkLength * tileSize) - ((Mathf.Floor(index / 3) - (chunkLength / 2)) * tileSize)
 			);
 		}
 
 		public void UpdateCollider() {
+			Debug.Log("A");
 			ResetContainerLoopPos();
 
 			Mesh mesh = new Mesh();
@@ -92,7 +91,6 @@ namespace Environment {
 
 		public void LoopPosition(Vector3 moveAmount) {
 			transform.position += moveAmount;
-			offsetFromLooping = -(Mathf.Abs(moveAmount.z) % (chunkLength * tileSize)) + offsetFromLooping;
 			movedBack = true;
 		}
 		private void ResetContainerLoopPos() {

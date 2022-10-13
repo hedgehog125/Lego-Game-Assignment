@@ -15,7 +15,7 @@ namespace Player {
 		[Header("")]
 		[SerializeField] private DifficultyData m_difficulty;
 		[SerializeField] private MovementData m_movement;
-		[SerializeField] private float m_loopAfter;
+		[SerializeField] private float m_loopAfter; // This needs to be divisible by the chunk length in units
 
 
 		private int lane = 1;
