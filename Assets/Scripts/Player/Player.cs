@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Environment;
 using Util = Tools.Util;
-using static UnityEditor.PlayerSettings;
 
 namespace Player {
 	public class Player : MonoBehaviour {

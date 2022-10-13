@@ -8,30 +8,84 @@ namespace Environment {
 	[RequireComponent(typeof(Rigidbody))]
 	[RequireComponent(typeof(ObstaclesRenderer))]
 	public class ObstacleGenerator : MonoBehaviour {
+		[Header("Objects and references")]
+		[SerializeField] private GameObject m_player;
+
+		[Header("Chunk and obstacle info")]
 		[SerializeField] private List<ObstacleData> obstacles;
-		[SerializeField] private int chunkLength;
+		[SerializeField] private int m_chunkLength;
+		[SerializeField] private float m_tileSize;
+
+		[Header("Generation")]
+		[SerializeField] private int m_visibleGenAhead;
+		[SerializeField] private int m_physicsGenAhead;
 
 		private Queue<Chunk> futureChunks = new Queue<Chunk>(); // Sometimes some extra chunks will need to be partially generated if something from a generated chunk extends into them
 		private Chunk lastChunk;
+		private int lastSolidChunkID = -1; // The id of the furthest away chunk with collision
+		private int lastVisibleChunkID = -1;
+
+		private float playerStartOffset; // Because of the looping, the player being at Z: 0 might mean they're actually at the border of the chunk and not just the centre, this counters for it
 
 		private ObstaclesRenderer ren;
+		private Collider playerCol;
 		private void Awake() {
 			ren = GetComponent<ObstaclesRenderer>();
-			ren.Init(obstacles, chunkLength);
+			playerCol = m_player.GetComponent<Collider>();
+			ren.Init(obstacles, m_chunkLength, m_tileSize);
 
-			lastChunk = new Chunk(chunkLength);
+			lastChunk = new Chunk(m_chunkLength);
+			playerStartOffset = (m_chunkLength * m_tileSize) / 2; // The player starts in the centre of the chunk
 
-			
-			ren.Render(new Chunk[] { GenerateChunk() });
+			Tick();
+		}
+
+		private void FixedUpdate() {
+			Tick();
+		}
+
+		private void Tick() {
+			GenerateChunksTick();
+		}
+		private void GenerateChunksTick() {
+			int playerChunkID = Mathf.FloorToInt(
+				(
+					(m_player.transform.position.z + (playerCol.bounds.size.z / 2))
+					+ playerStartOffset
+				)
+				/ (m_chunkLength * m_tileSize)
+			);
+			bool colliderUpdateNeeded = playerChunkID + m_physicsGenAhead > lastSolidChunkID;
+
+			int chunksNeeded = (playerChunkID - lastVisibleChunkID) + m_visibleGenAhead;
+			if (chunksNeeded > 0) {
+				Chunk[] chunks = new Chunk[chunksNeeded];
+				for (int i = 0; i < chunksNeeded; i++) {
+					chunks[i] = GenerateChunk();
+				}
+				ren.Render(chunks, lastVisibleChunkID + 1, colliderUpdateNeeded);
+
+				lastVisibleChunkID += chunksNeeded;
+				if (colliderUpdateNeeded) { // The collider was just updated
+					lastSolidChunkID = lastVisibleChunkID;
+				}
+			}
+			else if (colliderUpdateNeeded) {
+				ren.UpdateCollider();
+				lastSolidChunkID = lastVisibleChunkID;
+			}
 		}
 
 		private Chunk GenerateChunk() {
 			Chunk chunk = futureChunks.Count == 0?
-				new Chunk(chunkLength)
+				new Chunk(m_chunkLength)
 				: futureChunks.Dequeue()
 			;
 
-			chunk.tiles[GetTileIndex(1, 0)] = 1;
+			chunk.tiles[GetTileIndex(0, 0)] = 1;
+			chunk.tiles[GetTileIndex(2, 0)] = 1;
+			//chunk.tiles[GetTileIndex(0, 5)] = 1;
+			//chunk.tiles[GetTileIndex(2, 5)] = 1;
 
 			lastChunk = chunk;
 			return chunk;
@@ -45,7 +99,7 @@ namespace Environment {
 			for (int x = 0; x < 3; x++) {
 				bool isClear = true;
 				for (int y = startY; y < endY; y++) {
-					Chunk chunk = y >= chunkLength? lastChunk : currentChunk;
+					Chunk chunk = y >= m_chunkLength? lastChunk : currentChunk;
 					int index = GetTileIndex(x, y);
 					if (GetTile(chunk, index) != -1) {
 						isClear = false;
@@ -73,7 +127,18 @@ namespace Environment {
 		}
 
 		public void LoopPosition(Vector3 moveAmount) {
-			Debug.Log("TODO");
+			float movedBack = Mathf.Abs(moveAmount.z);
+			float chunkWorldLength = m_chunkLength * m_tileSize;
+			int chunksMovedBack = Mathf.FloorToInt(movedBack / chunkWorldLength);
+
+			lastVisibleChunkID -= chunksMovedBack;
+			lastSolidChunkID -= chunksMovedBack;
+			//playerStartOffset = moved + ((chunksMovedBack + 0.5f) * chunkWorldLength);
+			playerStartOffset = (movedBack % chunkWorldLength) + (lastVisibleChunkID * chunkWorldLength);
+			Debug.Log(playerStartOffset);
+			Debug.Log(lastVisibleChunkID);
+
+			ren.LoopPosition(moveAmount);
 		}
 	}
 

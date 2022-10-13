@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace Environment {
 	public class ObstaclesRenderer : MonoBehaviour {
-		[SerializeField] private float m_tileSize;
-
 		[Header("Collision")]
 		[SerializeField] private Mesh m_groundMesh;
 		[SerializeField] private Transform m_groundTran;
@@ -20,20 +18,28 @@ namespace Environment {
 			}
 		}
 		private List<VisibleObject> visibleObjects = new List<VisibleObject>();
+		// ^ When things loop, this will be increased by the value provided and the whole object will be moved back. But the individual obstacles will be moved instead during the next collider update, using this value.
+		private bool movedBack;
+		private float offsetFromLooping;
 
 		private List<ObstacleData> obstacles;
-		private float chunkLength;
+		private int chunkLength;
+		private float tileSize;
 
 		private MeshCollider col;
-		public void Init(List<ObstacleData> _obstacles, float _chunkLength) {
+		public void Init(List<ObstacleData> _obstacles, int _chunkLength, float _tileSize) {
 			col = GetComponent<MeshCollider>();
 
 			obstacles = _obstacles;
 			chunkLength = _chunkLength;
+			tileSize = _tileSize;
 		}
 
-		public void Render(Chunk[] chunks) {
+		public void Render(Chunk[] chunks, int startChunkID, bool shouldUpdateCollider) {
+			if (shouldUpdateCollider) ResetContainerLoopPos(); // If it's going to be reset, it needs to be done before the new objects so they don't get offset
+
 			for (int i = 0; i < chunks.Length; i++) {
+				int chunkID = i + startChunkID;
 				for (int pos = 0; pos < chunks[i].tiles.Length; pos++) {
 					int tileID = chunks[i].tiles[pos];
 					if (tileID == -1 || tileID == 0) continue;
@@ -42,24 +48,32 @@ namespace Environment {
 					ObstacleData obstacle = obstacles[tileID];
 
 					GameObject tile = Instantiate(obstacle.prefab, transform);
-					tile.transform.localPosition = IndexToWorldPos(pos) + obstacle.offset;
+					tile.transform.localPosition = IndexToWorldPos(pos, chunkID) + obstacle.offset;
 
 					visibleObjects.Add(new VisibleObject(tile, tileID));
 				}
 			}
 
-			UpdateCollider(); // TODO: only call when the end of the collider is near
+			if (shouldUpdateCollider) UpdateCollider();
 		}
 
-		private Vector3 IndexToWorldPos(int index) {
-			return new Vector3(((index % 3) - 1) * m_tileSize, 0, -((Mathf.Floor(index / 3) - (chunkLength / 2)) * m_tileSize));
+		private Vector3 IndexToWorldPos(int index, int chunkID) {
+			return new Vector3(
+				((index % 3) - 1) * tileSize,
+				0,
+				(
+					(chunkID * chunkLength * tileSize) - ((Mathf.Floor(index / 3) - (chunkLength / 2)) * tileSize)
+				) + offsetFromLooping
+			);
 		}
 
-		private void UpdateCollider() {
+		public void UpdateCollider() {
+			ResetContainerLoopPos();
+
 			Mesh mesh = new Mesh();
 
 			CombineInstance[] combine = new CombineInstance[transform.childCount + 1];
-			combine[0] = new CombineInstance {
+			combine[0] = new CombineInstance { // This will get temporarilly offset after a loop but before the next collider update, but since the visibile mesh is fine and it's quite big, it should be fine
 				mesh = m_groundMesh,
 				transform = m_groundTran.localToWorldMatrix
 			};
@@ -74,6 +88,22 @@ namespace Environment {
 			mesh.CombineMeshes(combine);
 
 			col.sharedMesh = mesh;
+		}
+
+		public void LoopPosition(Vector3 moveAmount) {
+			transform.position += moveAmount;
+			offsetFromLooping = -(Mathf.Abs(moveAmount.z) % (chunkLength * tileSize)) + offsetFromLooping;
+			movedBack = true;
+		}
+		private void ResetContainerLoopPos() {
+			if (movedBack) {
+				Vector3 moveAmount = transform.position;
+				transform.position = Vector3.zero;
+				foreach (VisibleObject visOb in visibleObjects) {
+					visOb.ob.transform.position += moveAmount;
+				}
+				movedBack = false;
+			}
 		}
 	}
 }
