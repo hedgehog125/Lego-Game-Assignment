@@ -66,7 +66,6 @@ namespace Environment {
 		}
 
 		public void UpdateCollider() {
-			Debug.Log("A");
 			ResetContainerLoopPos();
 
 			Mesh mesh = new Mesh();

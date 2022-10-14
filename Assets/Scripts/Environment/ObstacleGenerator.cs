@@ -52,11 +52,11 @@ namespace Environment {
 			if (chunksNeeded > 0) {
 				Chunk[] chunks = new Chunk[chunksNeeded];
 				for (int i = 0; i < chunksNeeded; i++) {
-					chunks[i] = GenerateChunk();
+					lastVisibleChunkID++;
+					chunks[i] = GenerateChunk(lastVisibleChunkID);
 				}
 				ren.Render(chunks, lastVisibleChunkID + 1, colliderUpdateNeeded);
 
-				lastVisibleChunkID += chunksNeeded;
 				if (colliderUpdateNeeded) { // The collider was just updated
 					lastSolidChunkID = lastVisibleChunkID;
 				}
@@ -67,16 +67,14 @@ namespace Environment {
 			}
 		}
 
-		private Chunk GenerateChunk() {
+		private Chunk GenerateChunk(int chunkID) {
 			Chunk chunk = futureChunks.Count == 0?
 				new Chunk(m_chunkLength)
 				: futureChunks.Dequeue()
 			;
 
-			chunk.tiles[GetTileIndex(0, 0)] = 1;
-			chunk.tiles[GetTileIndex(2, 0)] = 1;
-			//chunk.tiles[GetTileIndex(0, 5)] = 1;
-			//chunk.tiles[GetTileIndex(2, 5)] = 1;
+			PlaceTile(chunk, 0, 0, 0);
+			PlaceTile(chunk, 2, 0, 0);
 
 			lastChunk = chunk;
 			return chunk;
@@ -115,6 +113,13 @@ namespace Environment {
 		private int GetTile(Chunk chunk, int index) {
 			int? tile = chunk.tiles[index];
 			return tile == null? -1 : (int)tile;
+		}
+
+		private void PlaceTile(Chunk chunk, int x, int y, int tileID) {
+			PlaceTile(chunk, GetTileIndex(x, y), tileID);
+		}
+		private void PlaceTile(Chunk chunk, int index, int tileID) {
+			chunk.tiles[index] = tileID + 1;
 		}
 
 		private int GetPlayerChunkID() {
