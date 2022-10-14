@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Environment {
@@ -32,7 +33,7 @@ namespace Environment {
 			playerCol = m_player.GetComponent<Collider>();
 			ren.Init(obstacles, m_chunkLength, m_tileSize);
 
-			lastChunk = new Chunk(m_chunkLength);
+			lastChunk = new Chunk(m_chunkLength, -1);
 
 			Tick();
 		}
@@ -40,6 +41,22 @@ namespace Environment {
 		private void FixedUpdate() {
 			Tick();
 		}
+
+
+		private Chunk GenerateChunk(int chunkID) {
+			Chunk chunk = futureChunks.Count == 0 ?
+				new Chunk(m_chunkLength, chunkID)
+				: futureChunks.Dequeue()
+			;
+
+			PlaceTile(chunk, 0, 0, 0);
+			PlaceTile(chunk, 2, 0, 0);
+			//GetFreeLanesAhead(chunk, 5, 6);
+
+			lastChunk = chunk;
+			return chunk;
+		}
+
 
 		private void Tick() {
 			GenerateChunksTick();
@@ -50,11 +67,12 @@ namespace Environment {
 
 			int chunksNeeded = (playerChunkID - lastVisibleChunkID) + m_visibleGenAhead;
 			if (chunksNeeded > 0) {
+				Debug.Log(chunksNeeded);
 				Chunk[] chunks = new Chunk[chunksNeeded];
-				int generatingChunkID = lastVisibleChunkID + 1;
+				int generatingChunkID = lastVisibleChunkID;
 				for (int i = 0; i < chunksNeeded; i++) {
-					chunks[i] = GenerateChunk(generatingChunkID);
 					generatingChunkID++;
+					chunks[i] = GenerateChunk(generatingChunkID);
 				}
 				ren.Render(chunks, lastVisibleChunkID + 1, colliderUpdateNeeded);
 				lastVisibleChunkID = generatingChunkID;
@@ -69,30 +87,31 @@ namespace Environment {
 			}
 		}
 
-		private Chunk GenerateChunk(int chunkID) {
-			Chunk chunk = futureChunks.Count == 0?
-				new Chunk(m_chunkLength)
-				: futureChunks.Dequeue()
-			;
-
-			PlaceTile(chunk, 0, 0, 0);
-			PlaceTile(chunk, 2, 0, 0);
-
-			lastChunk = chunk;
-			return chunk;
+		private int[] GetFreeLanesAhead(Chunk currentChunk, int startY, int lengthForward) {
+			return GetFreeLanesBehind(currentChunk, startY, -lengthForward);
 		}
-		private int[] GetFreeLanes(Chunk currentChunk, int startY, int lengthBack) {
+		private int[] GetFreeLanesBehind(Chunk currentChunk, int startY, int lengthBack) {
 			// The ground is viewed in 2D top-down. Y: 0 is the top of the current chunk, Y: ((chunkLength * 2) -  1) is the bottom of the last chunk
 			int freeCount = 0;
 			int[] freeLanes = new int[3];
 
+			int dir = lengthBack > 0? 1 : -1;
 			int endY = startY + lengthBack;
 			for (int x = 0; x < 3; x++) {
 				bool isClear = true;
-				for (int y = startY; y < endY; y++) {
-					Chunk chunk = y >= m_chunkLength? lastChunk : currentChunk;
-					int index = GetTileIndex(x, y);
-					if (GetTile(chunk, index) != -1) {
+				for (int y = startY; (dir == 1? y < endY : y > endY); y += dir) {
+					Chunk chunk;
+					if (y < 0) {
+						chunk = futureChunks.ElementAt(Mathf.FloorToInt((-y - 1) / m_chunkLength)); // A little slow but there shouldn't be that many items
+					}
+					else if (y >= m_chunkLength) {
+						chunk = lastChunk;
+					}
+					else {
+						chunk = currentChunk;
+					}
+
+					if (GetTile(chunk, x, y) != -1) {
 						isClear = false;
 						break;
 					}
@@ -113,8 +132,10 @@ namespace Environment {
 			return GetTile(chunk, GetTileIndex(x, y));
 		}
 		private int GetTile(Chunk chunk, int index) {
-			int? tile = chunk.tiles[index];
-			return tile == null? -1 : (int)tile;
+			if (chunk == null) return -1;
+			if (index < 0 || index >= chunk.tiles.Length) return -1;
+
+			return chunk.tiles[index];
 		}
 
 		private void PlaceTile(Chunk chunk, int x, int y, int tileID) {
@@ -147,9 +168,13 @@ namespace Environment {
 
 	public class Chunk {
 		public int[] tiles; // -1 is empty, 0 is taken but not the origin of the obstacle, and the rest are the obstacle ids + 1
-		public Chunk(int length) {
-			tiles = new int[length * 3];
+		public int id;
+
+		public Chunk(int _length, int _id) {
+			tiles = new int[_length * 3];
 			Array.Fill(tiles, -1);
+
+			id = _id;
 		}
 	}
 }
