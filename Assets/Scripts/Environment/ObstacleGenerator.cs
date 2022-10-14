@@ -51,11 +51,13 @@ namespace Environment {
 			int chunksNeeded = (playerChunkID - lastVisibleChunkID) + m_visibleGenAhead;
 			if (chunksNeeded > 0) {
 				Chunk[] chunks = new Chunk[chunksNeeded];
+				int generatingChunkID = lastVisibleChunkID + 1;
 				for (int i = 0; i < chunksNeeded; i++) {
-					lastVisibleChunkID++;
-					chunks[i] = GenerateChunk(lastVisibleChunkID);
+					chunks[i] = GenerateChunk(generatingChunkID);
+					generatingChunkID++;
 				}
 				ren.Render(chunks, lastVisibleChunkID + 1, colliderUpdateNeeded);
+				lastVisibleChunkID = generatingChunkID;
 
 				if (colliderUpdateNeeded) { // The collider was just updated
 					lastSolidChunkID = lastVisibleChunkID;
