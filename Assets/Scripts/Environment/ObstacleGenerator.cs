@@ -67,7 +67,6 @@ namespace Environment {
 
 			int chunksNeeded = (playerChunkID - lastVisibleChunkID) + m_visibleGenAhead;
 			if (chunksNeeded > 0) {
-				Debug.Log(chunksNeeded);
 				Chunk[] chunks = new Chunk[chunksNeeded];
 				int generatingChunkID = lastVisibleChunkID;
 				for (int i = 0; i < chunksNeeded; i++) {
