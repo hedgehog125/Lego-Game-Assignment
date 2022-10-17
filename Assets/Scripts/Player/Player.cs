@@ -60,6 +60,8 @@ namespace Player {
 			normalContraints = rb.constraints;
 			standHeight = col.height;
 			halfDuckHeightDiff = (standHeight - m_movement.duckHeight) / 2;
+
+			vis.Init();
 		}
 
 		private enum SwipeAction {
@@ -124,6 +126,20 @@ namespace Player {
 			if (Dead) {
 				vel.x *= m_movement.deathSpeedMaintainance;
 				vel.z *= m_movement.deathSpeedMaintainance;
+
+				// So the player doesn't float a bit, move the collider up from the ground using the rotation
+				float rot = Mathf.DeltaAngle(transform.eulerAngles.x, 0);
+				if (transform.up.x < Vector3.up.x) rot *= -1;
+
+				if (rot > -45 && rot < 45) {
+					col.center = Vector3.zero;
+				}
+				else if (rot > 45) {
+					col.center = new Vector3(0, 0, 0.25f);
+				}
+				else {
+					col.center = new Vector3(0, 0, -0.25f);
+				}
 			}
 			else {
 				CheckStuckTick(pos);
@@ -159,7 +175,7 @@ namespace Player {
 			else {
 				stuckTicks[0]++;
 			}
-			if (Mathf.Abs(pos.z - lastPos.z) > 0.015f) {
+			if (pos.z - lastPos.z > 0.015f) { // No abs because the player needs to be moving forwards
 				stuckTicks[1] = 0;
 			}
 			else {
@@ -197,7 +213,7 @@ namespace Player {
 				else {
 					bool withinSlowDistance = Mathf.Abs(pos.x - targetX) < m_movement.slowDistanceBeforeLane;
 					int maxStopTime = 3;
-					//if (withinSlowDistance) maxStopTime = 10;
+					if (withinSlowDistance) maxStopTime = 10;
 
 					if (switchLaneTick == m_movement.maxLaneSwitchTime || stuckTicks[0] >= maxStopTime) { // Reverse
 						if (laneSwitchFailed) { // Just teleport if it's gone wrong twice
@@ -323,12 +339,14 @@ namespace Player {
 		}
 
 		private void ProcessStunTick() {
-			if (stunTick == m_difficulty.stunTime) {
-				Stunned = false;
-				stunTick = 0;
-			}
-			else {
-				stunTick++;
+			if (Stunned) {
+				if (stunTick == m_difficulty.stunTime) {
+					Stunned = false;
+					stunTick = 0;
+				}
+				else {
+					stunTick++;
+				}
 			}
 		}
 		private void CheckCrashedTick(ref Vector3 vel) {

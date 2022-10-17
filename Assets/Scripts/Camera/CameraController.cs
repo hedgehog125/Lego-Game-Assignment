@@ -6,11 +6,11 @@ using UnityEngine.Rendering;
 
 public class CameraController : MonoBehaviour {
 	[Header("Objects and references")]
-	[SerializeField] private CinemachineVirtualCamera cm;
+	[SerializeField] private CinemachineVirtualCamera m_cm;
 
 	[Header("")]
-	[SerializeField] private float deadZoomSpeed;
-	[SerializeField] private float minDeadFOV;
+	[SerializeField] private float m_deadZoomSpeed;
+	[SerializeField] private float m_minDeadFOV;
 
 	private bool playerIsDead;
 
@@ -20,7 +20,7 @@ public class CameraController : MonoBehaviour {
 	private void Awake() {
 		vol = GetComponent<Volume>();
 
-		normalFOV = cm.m_Lens.FieldOfView;
+		normalFOV = m_cm.m_Lens.FieldOfView;
 	}
 
 	public void RenderState(Player.Player player) {
@@ -30,16 +30,16 @@ public class CameraController : MonoBehaviour {
 		}
 		else {
 			vol.enabled = false;
-			cm.m_Lens.FieldOfView = normalFOV;
+			m_cm.m_Lens.FieldOfView = normalFOV;
 		}
 	}
 	public void LoopPosition(Vector3 moveAmount) {
-		cm.ForceCameraPosition(transform.position + moveAmount, transform.rotation);
+		m_cm.ForceCameraPosition(transform.position + moveAmount, transform.rotation);
 	}
 
 	private void Update() {
 		if (playerIsDead) {
-			cm.m_Lens.FieldOfView = Mathf.Max(cm.m_Lens.FieldOfView - (deadZoomSpeed * Time.deltaTime), minDeadFOV);
+			m_cm.m_Lens.FieldOfView = Mathf.Max(m_cm.m_Lens.FieldOfView - (m_deadZoomSpeed * Time.deltaTime), m_minDeadFOV);
 		}
 	}
 }

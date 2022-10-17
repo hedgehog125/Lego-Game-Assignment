@@ -12,14 +12,15 @@ namespace Player {
 		[SerializeField] private float m_stunVolume;
 		[SerializeField] private AudioSource m_deathSound;
 
+		private Animator anim;
+		public void Init() {
+			anim = GetComponent<Animator>();
+		}
+
 		public void RenderState(Player player) {
 			m_halo.SetActive(player.Stunned);
-			if (player.Ducking) {
-				transform.localScale = Vector3.one / 2;
-			}
-			else {
-				transform.localScale = Vector3.one;
-			}
+
+			anim.SetBool("Ducking", player.Ducking);
 		}
 		public void OnDie() {
 			m_bonkSound.Stop();
