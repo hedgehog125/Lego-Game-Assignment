@@ -22,7 +22,7 @@ MonoBehaviour:
   jumpAmount: 5
   fastFallAccceleration: 0.75
   duckHeight: 1
-  duckTime: 100
+  duckTime: 80
   slowMoSpeed: 0.35
   deathKnockbackAmount: 25
   deathRotateAmount: 10
