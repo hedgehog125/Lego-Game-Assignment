@@ -19,7 +19,7 @@ MonoBehaviour:
   slowDistanceBeforeLane: 0.65
   slowDistanceMaintainance: 0.8
   laneSlowMinSpeed: 0.4
-  jumpAmount: 5
+  jumpAmount: 7
   fastFallAccceleration: 0.75
   duckHeight: 1
   duckTime: 80
@@ -27,3 +27,4 @@ MonoBehaviour:
   deathKnockbackAmount: 25
   deathRotateAmount: 10
   deathSpeedMaintainance: 0.9
+  swipeDeadzone: 15

@@ -26,5 +26,8 @@ namespace Player {
 		public float deathKnockbackAmount;
 		public float deathRotateAmount;
 		public float deathSpeedMaintainance;
+
+		[Header("Input")]
+		public float swipeDeadzone;
 	}
 }

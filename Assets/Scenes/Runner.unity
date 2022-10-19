@@ -725,6 +725,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_halo: {fileID: 177994766}
+  m_cameraFollowPoint: {fileID: 2142461197}
   m_bonkSound: {fileID: 773407891}
   m_stunVolume: 0.1
   m_deathSound: {fileID: 773407890}
@@ -1198,10 +1199,12 @@ MonoBehaviour:
   obstacles:
   - {fileID: 11400000, guid: 81b47643ed7614c60a7fa17ab5303110, type: 2}
   - {fileID: 11400000, guid: de84ead0d0fec4057903231d83f8ab8b, type: 2}
+  - {fileID: 11400000, guid: 999b27577eaca40fab424c8075dfbd65, type: 2}
   m_chunkLength: 6
   m_tileSize: 2
   m_visibleGenAhead: 4
   m_physicsGenAhead: 1
+  m_generatorData: {fileID: 11400000, guid: a3e0cb44e419f4c6cae7a71088995047, type: 2}
 --- !u!54 &1545220318
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1362,6 +1365,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 773407889}
+  - {fileID: 2142461198}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1513,7 +1517,7 @@ MonoBehaviour:
   m_Priority: 10
   m_StandbyUpdate: 0
   m_LookAt: {fileID: 0}
-  m_Follow: {fileID: 1761057312}
+  m_Follow: {fileID: 2142461198}
   m_Lens:
     FieldOfView: 40
     OrthographicSize: 10
@@ -1716,7 +1720,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd3e4f99f69cf5a49a25a25c47c52ac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_cm: {fileID: 1882036014}
+  cm: {fileID: 1882036014}
   m_deadZoomSpeed: 7.5
   m_minDeadFOV: 20
 --- !u!1001 &1915811027
@@ -2094,6 +2098,37 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 1915811027}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2142461197
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2142461198}
+  m_Layer: 0
+  m_Name: CameraFollowPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2142461198
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142461197}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1761057312}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &41387257958017269
 MeshFilter:
   m_ObjectHideFlags: 0

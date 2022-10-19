@@ -1,4 +1,4 @@
-using System;
+using Array = System.Array;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +20,7 @@ namespace Environment {
 		[Header("Generation")]
 		[SerializeField] private int m_visibleGenAhead;
 		[SerializeField] private int m_physicsGenAhead;
+		[SerializeField] private GeneratorData m_generatorData;
 
 		private Queue<Chunk> futureChunks = new Queue<Chunk>(); // Sometimes some extra chunks will need to be partially generated if something from a generated chunk extends into them
 		private Chunk lastChunk;
@@ -44,13 +45,22 @@ namespace Environment {
 
 
 		private Chunk GenerateChunk(int chunkID) {
-			Chunk chunk = futureChunks.Count == 0 ?
+			Chunk chunk = futureChunks.Count == 0?
 				new Chunk(m_chunkLength, chunkID)
 				: futureChunks.Dequeue()
 			;
 
-			PlaceTile(chunk, 0, 0, 0);
-			PlaceTile(chunk, 2, 0, 0);
+			if (chunkID == 0) {
+				FillRect(chunk, 0, m_chunkLength - m_generatorData.clearStartLength, 3, m_generatorData.clearStartLength, -1); // Reserve an empty rectangle where the player spawns
+			}
+
+			int rockCount = Random.Range(m_generatorData.rockCount.x, m_generatorData.rockCount.y);
+			for (int i = 0; i < rockCount; i++) {
+				GetRandomPos(out int x, out int y);
+				if (! IsLaneClearBehind(chunk, x, y, 3)) continue;
+
+				PlaceIfEmpty(chunk, x, y, 0);
+			}
 			//GetFreeLanesAhead(chunk, 5, 6);
 
 			lastChunk = chunk;
@@ -94,28 +104,8 @@ namespace Environment {
 			int freeCount = 0;
 			int[] freeLanes = new int[3];
 
-			int dir = lengthBack > 0? 1 : -1;
-			int endY = startY + lengthBack;
-			for (int x = 0; x < 3; x++) {
-				bool isClear = true;
-				for (int y = startY; (dir == 1? y < endY : y > endY); y += dir) {
-					Chunk chunk;
-					if (y < 0) {
-						chunk = futureChunks.ElementAt(Mathf.FloorToInt((-y - 1) / m_chunkLength)); // A little slow but there shouldn't be that many items
-					}
-					else if (y >= m_chunkLength) {
-						chunk = lastChunk;
-					}
-					else {
-						chunk = currentChunk;
-					}
-
-					if (GetTile(chunk, x, y) != -1) {
-						isClear = false;
-						break;
-					}
-				}
-				if (isClear) {
+			for (int x = 0; x < 3; x++) {				
+				if (IsLaneClearBehind(currentChunk, x, startY, lengthBack)) {
 					freeLanes[freeCount] = x;
 					freeCount++;
 				}
@@ -124,6 +114,30 @@ namespace Environment {
 			Array.Resize(ref freeLanes, freeCount);
 			return freeLanes;
 		}
+		private bool IsLaneClearAhead(Chunk currentChunk, int x, int startY, int lengthForward) {
+			return IsLaneClearAhead(currentChunk, x, startY, -lengthForward);
+		}
+		private bool IsLaneClearBehind(Chunk currentChunk, int x, int startY, int lengthBack) {
+			int dir = lengthBack > 0? 1 : -1;
+			int endY = startY + lengthBack;
+
+			for (int y = startY; dir == 1? y < endY : y > endY; y += dir) {
+				Chunk chunk;
+				if (y < 0) {
+					chunk = futureChunks.ElementAt(Mathf.FloorToInt((-y - 1) / m_chunkLength)); // A little slow but there shouldn't be that many items
+				}
+				else if (y >= m_chunkLength) {
+					chunk = lastChunk;
+				}
+				else {
+					chunk = currentChunk;
+				}
+
+				if (! IsTileEmpty(chunk, x, y)) return false;
+			}
+			return true;
+		}
+
 		public static int GetTileIndex(int x, int y) {
 			return (y * 3) + x;
 		}
@@ -136,7 +150,32 @@ namespace Environment {
 
 			return chunk.tiles[index];
 		}
+		private bool IsTileEmpty(Chunk chunk, int x, int y) {
+			return IsTileEmpty(chunk, GetTileIndex(x, y));
+		}
+		private bool IsTileEmpty(Chunk chunk, int index) {
+			int tileID = GetTile(chunk, index);
+			return tileID == -1 || tileID == 1;
+		}
 
+		private void FillRect(Chunk chunk, int startX, int startY, int width, int height, int tileID) {
+			int endX = startX + width;
+			int endY = startY + height;
+			for (int y = startY; y < endY; y++) {
+				for (int x = startX; x < endX; x++) {
+					PlaceTile(chunk, x, y, tileID);
+				}
+			}
+		}
+		private bool PlaceIfEmpty(Chunk chunk, int x, int y, int tileID) {
+			return PlaceIfEmpty(chunk, GetTileIndex(x, y), tileID);
+		}
+		private bool PlaceIfEmpty(Chunk chunk, int index, int tileID) {
+			if (! IsTileEmpty(chunk, index)) return false;
+
+			PlaceTile(chunk, index, tileID);
+			return true;
+		}
 		private void PlaceTile(Chunk chunk, int x, int y, int tileID) {
 			PlaceTile(chunk, GetTileIndex(x, y), tileID);
 		}
@@ -149,6 +188,13 @@ namespace Environment {
 				(m_player.transform.position.z + (playerCol.bounds.size.z / 2))
 				/ (m_chunkLength * m_tileSize)
 			);
+		}
+		private void GetRandomPos(out int x, out int y) {
+			x = Random.Range(0, 3);
+			y = Random.Range(0, m_chunkLength);
+		}
+		private int GetRandomIndex() {
+			return Random.Range(0, m_chunkLength * 3);
 		}
 
 		public void LoopPosition(Vector3 moveAmount) {

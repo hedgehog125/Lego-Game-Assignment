@@ -61,7 +61,7 @@ namespace Player {
 			standHeight = col.height;
 			halfDuckHeightDiff = (standHeight - m_movement.duckHeight) / 2;
 
-			vis.Init();
+			vis.Init(halfDuckHeightDiff);
 		}
 
 		private enum SwipeAction {
@@ -105,9 +105,13 @@ namespace Player {
 				return;
 			}
 
+			QueueJump();
+		}
+		private void QueueJump() {
 			if (jumpInput) queuedInput = SwipeAction.Jump;
 			else jumpInput = true;
 		}
+
 		private bool duckInput;
 		private void OnDuck(InputValue input) {
 			if (! input.isPressed) {
@@ -117,6 +121,34 @@ namespace Player {
 
 			if (duckInput) queuedInput = SwipeAction.Duck;
 			else duckInput = true;
+		}
+		private void QueueDuck() {
+			if (duckInput) queuedInput = SwipeAction.Duck;
+			else duckInput = true;
+		}
+
+		private Vector2 swipeStartPos;
+		private void OnTouch(InputValue input) {
+			if (input.isPressed) {
+				swipeStartPos = touchPos;
+			}
+			else {
+				Vector2 moved = touchPos - swipeStartPos;
+				if (moved.magnitude > m_movement.swipeDeadzone) {
+					if (Mathf.Abs(moved.x) > Mathf.Abs(moved.y)) {
+						if (moved.x > 0) QueueLaneSwitch(true);
+						else QueueLaneSwitch(false);
+					}
+					else {
+						if (moved.y > 0) QueueJump();
+						else QueueDuck();
+					}
+				}
+			}
+		}
+		private Vector2 touchPos;
+		private void OnTouchPos(InputValue input) {
+			touchPos = input.Get<Vector2>();
 		}
 
 		private void FixedUpdate() {
@@ -128,17 +160,16 @@ namespace Player {
 				vel.z *= m_movement.deathSpeedMaintainance;
 
 				// So the player doesn't float a bit, move the collider up from the ground using the rotation
-				float rot = Mathf.DeltaAngle(transform.eulerAngles.x, 0);
-				if (transform.up.x < Vector3.up.x) rot *= -1;
+				float rot = Util.LoopAngle(transform.eulerAngles.x);
 
 				if (rot > -45 && rot < 45) {
 					col.center = Vector3.zero;
 				}
 				else if (rot > 45) {
-					col.center = new Vector3(0, 0, 0.25f);
+					col.center = new Vector3(0, 0, -0.25f);
 				}
 				else {
-					col.center = new Vector3(0, 0, -0.25f);
+					col.center = new Vector3(0, 0, 0.25f);
 				}
 			}
 			else {
@@ -284,12 +315,17 @@ namespace Player {
 				}
 			}
 
-			if (jumpInput && onGround) { // TODO: buffer if not on ground, maybe differently to normal so 2 things can be buffered?
-				if (Ducking) EndDuck(ref pos);
+			if (jumpInput) {
+				if (onGround) {
+					if (Ducking) EndDuck(ref pos);
 
-				vel.y = m_movement.jumpAmount;
+					vel.y = m_movement.jumpAmount;
+					fastFalling = false;
+				}
+				else {
+					queuedInput = SwipeAction.Jump;
+				}
 				jumpInput = false;
-				fastFalling = false;
 			}
 		}
 		private void ProcessDuckTick(bool onGround, ref Vector3 pos, ref Vector3 vel) {
@@ -336,6 +372,7 @@ namespace Player {
 			duckTick = 0;
 			col.height = standHeight;
 			pos.y += halfDuckHeightDiff;
+			duckInput = false;
 		}
 
 		private void ProcessStunTick() {
