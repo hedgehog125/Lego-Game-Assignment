@@ -15,6 +15,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Tap",
+                    "type": "Value",
+                    "id": "d3bcc639-58e6-41eb-ae9a-bbc8b387e936",
+                    "expectedControlType": "Digital",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "Right",
                     "type": "Value",
                     "id": "efb3e212-7b32-469b-8da9-9e6e98054f3d",
@@ -126,6 +135,39 @@
                     "action": "Touch",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1f0da4a8-d61f-4cf1-810b-5d18e597d9dc",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Tap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d06cc0a1-7a17-4252-9011-99d85b033420",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Tap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "26125b9b-b556-4bd4-8c00-6df6b0a8625d",
+                    "path": "<Touchscreen>/primaryTouch/tap",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Touch",
+                    "action": "Tap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
@@ -137,7 +179,12 @@
             "devices": [
                 {
                     "devicePath": "<Keyboard>",
-                    "isOptional": false,
+                    "isOptional": true,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": true,
                     "isOR": false
                 }
             ]
@@ -148,7 +195,7 @@
             "devices": [
                 {
                     "devicePath": "<Touchscreen>",
-                    "isOptional": false,
+                    "isOptional": true,
                     "isOR": false
                 }
             ]

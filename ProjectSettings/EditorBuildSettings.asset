@@ -5,9 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/FPSTest.unity
-    guid: 9a4c9829198b740b38fc86646d4e087a
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 67108b5288a37a04faa446467d856ad0
   - enabled: 1
     path: Assets/Scenes/Runner.unity
     guid: 8065bf020671144be9e940408f14738f

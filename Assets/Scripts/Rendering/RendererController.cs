@@ -5,6 +5,7 @@ using Player;
 
 namespace Rendering {
 	public class RendererController : MonoBehaviour {
+		[SerializeField] private bool inGame = true;
 		[SerializeField] private Player.Player m_player;
 		[SerializeField] private float m_deathResReduction;
 
@@ -18,15 +19,21 @@ namespace Rendering {
 		}
 
 		private void FixedUpdate() {
-			if (m_player.Dead) {
-				Screen.SetResolution(
-					Mathf.FloorToInt(normalRes.width / m_deathResReduction),
-					Mathf.FloorToInt(normalRes.height / m_deathResReduction),
-					normalFullScreenMode
-				);
-			}
-			else {
-				Screen.SetResolution(normalRes.width, normalRes.height, normalFullScreenMode);
+			if (inGame) {
+				if (m_player.Dead) {
+					Screen.SetResolution(
+						Mathf.FloorToInt(normalRes.width / m_deathResReduction),
+						Mathf.FloorToInt(normalRes.height / m_deathResReduction),
+						normalFullScreenMode
+					);
+				}
+				else {
+					Screen.SetResolution(normalRes.width, normalRes.height, normalFullScreenMode);
+				}
+
+				if (QualitySettings.antiAliasing != 0) {
+					Application.Quit();
+				}
 			}
 		}
 	}
