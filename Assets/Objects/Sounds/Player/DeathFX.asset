@@ -9,11 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b07d775604dc4afb8514e2884e61c6d, type: 3}
-  m_Name: Difficulty
+  m_Script: {fileID: 11500000, guid: ab0ba9efeb0a03f4fa81dfcced93a324, type: 3}
+  m_Name: DeathFX
   m_EditorClassIdentifier: 
-  startSpeed: 4
-  maxSpeed: 25
-  speedupRate: 0.0015
-  stunTime: 250
-  stunImmunityTime: 25
+  clip: {fileID: 8300000, guid: dad2065f93ac8134482ba10790bbeb94, type: 3}
+  volume: 1
+  priority: 50
+  loop: 0

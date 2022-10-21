@@ -25,6 +25,8 @@ namespace Player {
 		private float[] lanes;
 
 		private int stunTick;
+		private int stunImmunityTick;
+
 		private int duckTick;
 		private bool fastFalling;
 
@@ -41,6 +43,7 @@ namespace Player {
 		// Used by PlayerVisible
 		public bool Stunned { get; private set; }
 		public bool Ducking { get; private set; }
+		public bool Jumping { get; private set; }
 		public bool Dead { get; private set; }
 
 		private CapsuleCollider col;
@@ -55,7 +58,7 @@ namespace Player {
 				0,
 				m_movement.laneWidth
 			};
-			lastPos = transform.position;
+			lastPos = transform.position - new Vector3(0, 0, 1);
 
 			normalContraints = rb.constraints;
 			standHeight = col.height;
@@ -175,6 +178,7 @@ namespace Player {
 			else {
 				CheckStuckTick(pos);
 				bool onGround = DetectGroundTick();
+
 				LoopPositionTick(ref pos);
 				LanesTick(ref pos, ref vel);
 				JumpTick(ref pos, ref vel, onGround);
@@ -206,7 +210,7 @@ namespace Player {
 			else {
 				stuckTicks[0]++;
 			}
-			if (pos.z - lastPos.z > 0.015f) { // No abs because the player needs to be moving forwards
+			if (pos.z - lastPos.z > 0.025f) { // No abs because the player needs to be moving forwards
 				stuckTicks[1] = 0;
 			}
 			else {
@@ -258,9 +262,9 @@ namespace Player {
 								: -m_movement.laneSwitchAcceleration
 							;
 							laneSwitchFailed = true;
-
-							Stun(ref vel);
 						}
+						stuckTicks[0] = 0;
+						Stun(ref vel);
 					}
 					else {
 						if (
@@ -321,11 +325,16 @@ namespace Player {
 
 					vel.y = m_movement.jumpAmount;
 					fastFalling = false;
+					Jumping = true;
 				}
 				else {
 					queuedInput = SwipeAction.Jump;
 				}
 				jumpInput = false;
+			}
+
+			if (onGround && (! jumpInput)) {
+				Jumping = false;
 			}
 		}
 		private void ProcessDuckTick(bool onGround, ref Vector3 pos, ref Vector3 vel) {
@@ -385,13 +394,25 @@ namespace Player {
 					stunTick++;
 				}
 			}
+
+			if (stunImmunityTick != 0) {
+				if (stunImmunityTick == m_difficulty.stunImmunityTime) {
+					stunImmunityTick = 0;
+				}
+				else {
+					stunImmunityTick++;
+				}
+			}
 		}
 		private void CheckCrashedTick(ref Vector3 vel) {
 			int maxStopTime = 3;
-			if (switchingToLane != -1) maxStopTime = 10;
+			if (switchingToLane != -1 || Ducking || Jumping) maxStopTime = 10;
 
 			if (stuckTicks[1] >= maxStopTime) {
 				GameOver(ref vel);
+			}
+			else if (stuckTicks[1] >= 2) {
+				Stun(ref vel);
 			}
 		}
 		private void DeathPlaneTick(Vector3 pos, ref Vector3 vel) {
@@ -399,11 +420,14 @@ namespace Player {
 		}
 
 		private void Stun(ref Vector3 vel) {
+			if (stunImmunityTick != 0) return;
+
 			if (Stunned) {
 				GameOver(ref vel);
 				return;
 			}
 			Stunned = true;
+			stunImmunityTick = 1;
 			vis.OnStun();
 		}
 		private void GameOver(ref Vector3 vel) {

@@ -9,6 +9,7 @@ public class DifficultyData : ScriptableObject {
 	public float maxSpeed;
 	public float speedupRate;
 
-	[Header("")]
+	[Header("Stunning")]
 	public int stunTime;
+	public int stunImmunityTime;
 }
