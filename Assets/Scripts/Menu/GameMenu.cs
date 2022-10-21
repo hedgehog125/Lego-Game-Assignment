@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using RendererController = Rendering.RendererController;
 
 namespace Menu {
 	public class GameMenu : MonoBehaviour {
 		[SerializeField] private Player.Player m_player;
+		[SerializeField] private RendererController m_rendererController;
 		[SerializeField] private string m_menuScene;
 		[SerializeField] private int m_deathTextDelay;
 
@@ -40,6 +42,7 @@ namespace Menu {
 
 		private void GoToMainMenu() {
 			Time.timeScale = 1;
+			m_rendererController.ResetDeath();
 
 			SceneManager.LoadScene(m_menuScene);
 		}

@@ -11,6 +11,7 @@ namespace Rendering {
 
 		private Resolution normalRes;
 		private FullScreenMode normalFullScreenMode;
+		private bool playerWasDead;
 		private void Awake() {
 			normalRes = Screen.currentResolution;
 			normalFullScreenMode = Screen.fullScreenMode;
@@ -20,21 +21,24 @@ namespace Rendering {
 
 		private void FixedUpdate() {
 			if (inGame) {
-				if (m_player.Dead) {
-					Screen.SetResolution(
-						Mathf.FloorToInt(normalRes.width / m_deathResReduction),
-						Mathf.FloorToInt(normalRes.height / m_deathResReduction),
-						normalFullScreenMode
-					);
-				}
-				else {
-					Screen.SetResolution(normalRes.width, normalRes.height, normalFullScreenMode);
-				}
-
-				if (QualitySettings.antiAliasing != 0) {
-					Application.Quit();
+				if (m_player.Dead != playerWasDead) {
+					if (m_player.Dead) {
+						Screen.SetResolution(
+							Mathf.FloorToInt(normalRes.width / m_deathResReduction),
+							Mathf.FloorToInt(normalRes.height / m_deathResReduction),
+							normalFullScreenMode
+						);
+					}
+					else {
+						ResetDeath();
+					}
+					playerWasDead = m_player.Dead;
 				}
 			}
+		}
+
+		public void ResetDeath() {
+			Screen.SetResolution(normalRes.width, normalRes.height, normalFullScreenMode);
 		}
 	}
 }
