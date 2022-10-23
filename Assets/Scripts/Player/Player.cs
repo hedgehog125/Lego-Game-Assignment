@@ -38,6 +38,7 @@ namespace Player {
 		private float halfDuckHeightDiff;
 
 		private float distanceMoved;
+		public int Score { get; private set; } // Used by the UI
 		private float speed;
 
 		// Used by PlayerVisible
@@ -188,7 +189,7 @@ namespace Player {
 				CheckCrashedTick(ref vel);
 				if (! Dead) {
 					vel.z = speed;
-					distanceMoved += speed;
+					Score = Mathf.FloorToInt(distanceMoved);
 
 					speed = Mathf.Min(speed + m_difficulty.speedupRate, m_difficulty.maxSpeed);
 				}
@@ -217,6 +218,7 @@ namespace Player {
 				stuckTicks[1]++;
 			}
 
+			distanceMoved += pos.z - lastPos.z;
 			lastPos = pos;
 		}
 		private bool DetectGroundTick() {
@@ -231,6 +233,7 @@ namespace Player {
 			Vector3 moveAmount = new Vector3(0, 0, -(multiple * m_loopAfter));
 
 			pos += moveAmount;
+			lastPos += moveAmount;
 			m_cmCam.LoopPosition(moveAmount);
 			m_obstacleScript.LoopPosition(moveAmount);
 		}

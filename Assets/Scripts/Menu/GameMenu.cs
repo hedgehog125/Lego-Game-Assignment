@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -12,8 +13,9 @@ namespace Menu {
 		[SerializeField] private string m_menuScene;
 		[SerializeField] private int m_deathTextDelay;
 
-		[Space]
+		[Header("Internal")]
 		[SerializeField] private GameObject m_gameOverText;
+		[SerializeField] private TextMeshProUGUI m_scoreText;
 
 		private int deathTextTick;
 
@@ -38,6 +40,8 @@ namespace Menu {
 					deathTextTick++;
 				}
 			}
+
+			m_scoreText.text = $"Score: {m_player.Score.ToString().PadLeft(7, '0')}";
 		}
 
 		private void GoToMainMenu() {
