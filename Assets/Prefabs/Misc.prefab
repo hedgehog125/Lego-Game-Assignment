@@ -46,4 +46,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inGame: 1
   m_player: {fileID: 0}
-  m_deathResReduction: 5
+  m_deathResReduction: 4
