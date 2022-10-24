@@ -14,6 +14,7 @@ namespace Player {
 
 
 		private int haloWaitTick;
+		private AudioSource ingameMusic;
 
 		private float halfDuckHeightDiff;
 
@@ -24,6 +25,8 @@ namespace Player {
 			snds = GetComponent<SoundPlayer>();
 
 			halfDuckHeightDiff = _halfDuckHeightDiff;
+
+			ingameMusic = snds.Play(3);
 		}
 
 		public void RenderState(Player player) {
@@ -46,6 +49,8 @@ namespace Player {
 			anim.SetBool("Ducking", player.Ducking);
 		}
 		public void OnDie() {
+			if (ingameMusic != null) ingameMusic.Stop();
+
 			snds.Play(1);
 			snds.Play(2);
 		}

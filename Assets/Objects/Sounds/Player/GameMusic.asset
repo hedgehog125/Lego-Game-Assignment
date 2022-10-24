@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ab0ba9efeb0a03f4fa81dfcced93a324, type: 3}
-  m_Name: DeathMusic
+  m_Name: GameMusic
   m_EditorClassIdentifier: 
-  clip: {fileID: 8300000, guid: 73177574033d1422eb94b0e922e70af4, type: 3}
-  volume: 0.85
+  clip: {fileID: 8300000, guid: c805c3f7d70f95f4d87c1ee09ca46214, type: 3}
+  volume: 1
   priority: 40
-  loop: 0
+  loop: 1

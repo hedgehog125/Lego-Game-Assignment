@@ -3,6 +3,9 @@ SFX
 Bonk: https://www.freesoundslibrary.com/bonk-sound-effect/ under CC BY 4.0. I trimmed the start
 Death: https://freesound.org/people/DeVern/sounds/426192/ under CC0. I trimmed most of it off to just use the quiet bit at the start
 
+Music
+In game: https://freesound.org/people/VABsounds/sounds/381384/ under CC0
+
 == Fonts ==
 Roboto: part of the FPS counter package, under Apache 2.0
 Liberation Sans: 2010 Google Corporation and 2012 Red Hat, Inc., under SIL OPEN FONT LICENSE Version 1.1
