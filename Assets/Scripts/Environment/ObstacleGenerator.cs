@@ -63,7 +63,10 @@ namespace Environment {
 				GetRandomPos(out int x, out int y);
 				if ((! IsLaneClearBehind(x, y, 3)) || (! IsLaneClearAhead(x, y, 3))) continue;
 
-				PlaceIfEmpty(x, y, 0);
+				int tileID = 0;
+				if (Random.Range(0, 5) == 0) tileID = 2;
+
+				PlaceIfEmpty(x, y, tileID);
 			}
 
 			lastChunk = chunk;
@@ -186,7 +189,7 @@ namespace Environment {
 		}
 		private bool IsTileEmpty(int x, int y) {
 			int tileID = GetTile(x, y);
-			return tileID == -1 || tileID == 1;
+			return tileID == -1;
 		}
 
 		private void FillRect(int startX, int startY, int width, int height, int tileID) {
