@@ -8,6 +8,9 @@ namespace Environment {
 		[SerializeField] private Mesh m_groundMesh;
 		[SerializeField] private Transform m_groundTran;
 
+		[Header("Deletion")]
+		[SerializeField] private float m_deleteAfterDistance;
+
 		private class VisibleObject {
 			public GameObject ob;
 			public int tileID;
@@ -23,20 +26,31 @@ namespace Environment {
 		private List<ObstacleData> obstacles;
 		private int chunkLength;
 		private float tileSize;
+		private Transform playerTran;
 
 		private MeshCollider col;
-		public void Init(List<ObstacleData> _obstacles, int _chunkLength, float _tileSize) {
+		public void Init(List<ObstacleData> _obstacles, int _chunkLength, float _tileSize, Transform _playerTran) {
 			col = GetComponent<MeshCollider>();
 
 			obstacles = _obstacles;
 			chunkLength = _chunkLength;
 			tileSize = _tileSize;
+			playerTran = _playerTran;
 		}
 
 		public void Render(Chunk[] chunks, int startChunkID, bool shouldUpdateCollider) {
 			Vector3 counterOffset = Vector3.zero;
 			if (shouldUpdateCollider) ResetContainerLoopPos(); // If it's going to be reset, it needs to be done before the new objects so they don't get offset
 			else counterOffset.z = -transform.position.z; // If it's not being reset yet, the offset still needs to be accounted for
+
+			for (int i = 0; i < visibleObjects.Count; i++) {
+				VisibleObject visOb = visibleObjects[i];
+				if (visOb.ob.transform.position.z < playerTran.position.z - m_deleteAfterDistance) {
+					Destroy(visOb.ob);
+					visibleObjects.RemoveAt(i);
+					i--;
+				}
+			}
 
 			for (int i = 0; i < chunks.Length; i++) {
 				int chunkID = i + startChunkID;
@@ -70,7 +84,7 @@ namespace Environment {
 
 			Mesh mesh = new Mesh();
 
-			CombineInstance[] combine = new CombineInstance[transform.childCount + 1];
+			CombineInstance[] combine = new CombineInstance[visibleObjects.Count + 1];
 			combine[0] = new CombineInstance { // This will get temporarilly offset after a loop but before the next collider update, but since the visibile mesh is fine and it's quite big, it should be fine
 				mesh = m_groundMesh,
 				transform = m_groundTran.localToWorldMatrix

@@ -89,6 +89,7 @@ namespace Player {
 				queuedInput = isRight? SwipeAction.Right : SwipeAction.Left;
 				return;
 			}
+			queuedInput = SwipeAction.None;
 
 			if (isRight) {
 				if (lane != 2) {
@@ -112,6 +113,8 @@ namespace Player {
 			QueueJump();
 		}
 		private void QueueJump() {
+			queuedInput = SwipeAction.None;
+
 			if (jumpInput) queuedInput = SwipeAction.Jump;
 			else jumpInput = true;
 		}
@@ -123,10 +126,11 @@ namespace Player {
 				return;
 			}
 
-			if (duckInput) queuedInput = SwipeAction.Duck;
-			else duckInput = true;
+			QueueDuck();
 		}
 		private void QueueDuck() {
+			queuedInput = SwipeAction.None;
+
 			if (duckInput) queuedInput = SwipeAction.Duck;
 			else duckInput = true;
 		}
@@ -222,7 +226,7 @@ namespace Player {
 			lastPos = pos;
 		}
 		private bool DetectGroundTick() {
-			Vector3 offset = new Vector3(0, -(col.bounds.size.y / 2) + 0.025f, 0);
+			Vector3 offset = new Vector3(0, -(col.bounds.size.y / 2) + 0.01f, 0);
 			Vector3 bottom = col.bounds.center + offset;
 			return Physics.Raycast(bottom, Vector3.down, 0.05f);
 		}

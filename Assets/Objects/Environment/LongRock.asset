@@ -10,10 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ba10bede2a2146d19fc4a00503c1002, type: 3}
-  m_Name: Ramp
+  m_Name: LongRock
   m_EditorClassIdentifier: 
-  prefab: {fileID: 5944109542476627027, guid: 8b84d30e3ea774fcda68a1e1d9e6a651, type: 3}
-  collider: {fileID: -2432090755550338912, guid: cb95a24c6f4d94fd193dcfc3e85feea8,
-    type: 3}
-  offset: {x: 0, y: 1, z: 1}
+  prefab: {fileID: 5429722395558533860, guid: 21350d5d94ec74e73a7e5b4cbf0e170d, type: 3}
+  collider: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  offset: {x: 0, y: 1, z: 0}
   blocksLane: 0

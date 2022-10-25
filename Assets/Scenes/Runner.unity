@@ -968,12 +968,13 @@ MonoBehaviour:
   m_player: {fileID: 1761057310}
   obstacles:
   - {fileID: 11400000, guid: 81b47643ed7614c60a7fa17ab5303110, type: 2}
-  - {fileID: 11400000, guid: de84ead0d0fec4057903231d83f8ab8b, type: 2}
   - {fileID: 11400000, guid: 999b27577eaca40fab424c8075dfbd65, type: 2}
+  - {fileID: 11400000, guid: de84ead0d0fec4057903231d83f8ab8b, type: 2}
+  - {fileID: 11400000, guid: a724720576613436e9a8dc0275641cc6, type: 2}
   m_chunkLength: 6
   m_tileSize: 2
-  m_visibleGenAhead: 4
-  m_physicsGenAhead: 1
+  m_visibleGenAhead: 5
+  m_physicsGenAhead: 2
   m_generatorData: {fileID: 11400000, guid: a3e0cb44e419f4c6cae7a71088995047, type: 2}
 --- !u!54 &1545220318
 Rigidbody:
@@ -1019,6 +1020,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_groundMesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
   m_groundTran: {fileID: 564460640}
+  m_deleteAfterDistance: 10
 --- !u!1 &1674172680
 GameObject:
   m_ObjectHideFlags: 0
@@ -1275,7 +1277,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 2.1285024, y: 1}
+    m_SensorSize: {x: 3.1557047, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0

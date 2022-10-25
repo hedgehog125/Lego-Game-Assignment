@@ -34,7 +34,7 @@ namespace Environment {
 		private void Awake() {
 			ren = GetComponent<ObstaclesRenderer>();
 			playerCol = m_player.GetComponent<Collider>();
-			ren.Init(obstacles, m_chunkLength, m_tileSize);
+			ren.Init(obstacles, m_chunkLength, m_tileSize, m_player.transform);
 
 			lastChunk = new Chunk(m_chunkLength, -1);
 
@@ -58,15 +58,24 @@ namespace Environment {
 				FillRect(0, m_chunkLength - m_generatorData.clearStartLength, 3, m_generatorData.clearStartLength, -1); // Reserve an empty rectangle where the player spawns
 			}
 
+			if (Random.Range(0, 10) == 0) {
+				GetRandomPos(out int x, out int y);
+				int totalLength = Random.Range(5, 15); // The slope takes up 2, so it should be at least 5 long
+				if (IsLaneClearBehind(x, y, 2) && IsLaneClearAhead(x, y, totalLength + 2)) {
+					PlaceTile(x, y, 2);
+					FillRect(x, (y - totalLength) + 1, 1, totalLength - 2, 3);
+				}
+			}
+
 			int rockCount = Random.Range(m_generatorData.rockCount.x, m_generatorData.rockCount.y);
 			for (int i = 0; i < rockCount; i++) {
 				GetRandomPos(out int x, out int y);
 				if ((! IsLaneClearBehind(x, y, 3)) || (! IsLaneClearAhead(x, y, 3))) continue;
 
 				int tileID = 0;
-				if (Random.Range(0, 5) == 0) tileID = 2;
+				if (Random.Range(0, 5) == 0) tileID = 1;
 
-				PlaceIfEmpty(x, y, tileID);
+				PlaceTile(x, y, tileID);
 			}
 
 			lastChunk = chunk;
@@ -220,7 +229,7 @@ namespace Environment {
 			if (chunk == null) {
 				if (relativeChunkID < 0) return; // Can't place in previous chunks
 
-				for (int chunkID = futureChunks.Count; chunkID < relativeChunkID; chunkID++) { // Create any future chunks in between to get to the position in the queue for the new one that's needed
+				for (int chunkID = futureChunks.Count; chunkID <= relativeChunkID; chunkID++) { // Create any future chunks in between to get to the position in the queue for the new one that's needed
 					chunk = new Chunk(m_chunkLength, chunkID); // This works because the needed chunk is made last
 					futureChunks.Enqueue(chunk);
 				}

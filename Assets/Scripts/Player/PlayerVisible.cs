@@ -50,7 +50,6 @@ namespace Player {
 		}
 		public void OnDie() {
 			if (ingameMusic != null) ingameMusic.Stop();
-			anim.enabled = false;
 
 			snds.Play(1);
 			snds.Play(2);
